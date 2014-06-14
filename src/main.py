@@ -37,5 +37,6 @@ if __name__ == "__main__":
                 bridge.update(application)
             time.sleep(1.0)
         except Exception, e:
+            db.rollback()
             logger.critical(e.message)
             time.sleep(1)
