@@ -4,6 +4,8 @@ from cwear.bridge.bridge import HumanApiDeviceCloudBridge
 import logging
 import sys
 import time
+from cwear.bridge.humanapi import HumanAPI
+from cwear.db.model import DatabaseManager, CwearApplication
 
 logger = logging.getLogger("boot")
 
@@ -17,11 +19,19 @@ def _setup_root_logger():
                                   "%m/%d %H:%M:%S")
     stream_handler.setFormatter(formatter)
 
+def get_cwear_applications(db):
+    return db.query(CwearApplication).all()
+
 if __name__ == "__main__":
     _setup_root_logger()
     logger.critical('--------------------------BOOT--------------------------')
-    bridge = HumanApiDeviceCloudBridge()
+    dbmgr = DatabaseManager()
+    db = dbmgr.get_db_session()
+    bridge = HumanApiDeviceCloudBridge(dbmgr)
 
     while True:
-        bridge.update()
-        time.sleep(10)
+        # Get the cwear applications and iterate over them
+        cwear_applications = get_cwear_applications(db)
+        for application in cwear_applications:
+            bridge.update(application)
+        time.sleep(1.0)

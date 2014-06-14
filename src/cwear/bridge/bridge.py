@@ -1,5 +1,6 @@
 """Bridge the input from Human API into Device Cloud streams"""
 import json
+import datetime
 import os
 import yaml
 
@@ -32,10 +33,9 @@ class HumanAPIStreamWriter(object):
 
 
 class HumanApiDeviceCloudBridge(object):
-    def __init__(self):
-        self._db_manager = DatabaseManager()
-        self._dc = DeviceCloud("connectedwearables", "Cwear12$")
-        self._hapi = HumanAPI(self._db_manager)
+
+    def __init__(self, dbmgr):
+        self._db_manager = dbmgr
         self._mapping_cache = None
 
     def get_humanapi_mapping_metadata(self):
@@ -44,24 +44,37 @@ class HumanApiDeviceCloudBridge(object):
                 self._mapping_cache = yaml.load(f)
         return self._mapping_cache
 
-    def update(self):
+    def update(self, cwear_app):
         """Update the bridge"""
+        # determine if it is time to do an update
+        now = datetime.datetime.now()
+        last_sync_dt = cwear_app.last_sync_time
+        sync_freq_seconds = cwear_app.sync_freq_secs
+        if last_sync_dt is None or (now - last_sync_dt).total_seconds() > sync_freq_seconds:
+            stream_writer = HumanAPIStreamWriter()
+            hapi = HumanAPI(
+                db_manager=self._db_manager,
+                app_key=cwear_app.related_hapiaccount.app_key,
+                client_id=cwear_app.related_hapiaccount.client_id)
 
-        stream_writer = HumanAPIStreamWriter()
+            for endpoint in self.get_humanapi_mapping_metadata().keys():
+                data = hapi.get_batch(cwear_app, endpoint)
+                try:
+                    self.process_batch_for_endpoint(endpoint, data, stream_writer)
+                except ValueError, e:
+                    logger.warn(e.message)
 
-        for endpoint in self.get_humanapi_mapping_metadata().keys():
-            data = self._hapi.get_batch(endpoint)
+            # record that we did do a sync at this time
+            cwear_app.last_sync_time = datetime.datetime.now()
+            self._db_manager.get_db_session().commit()
 
-            try:
-                self.process_batch_for_endpoint(endpoint, data, stream_writer)
-            except ValueError, e:
-                logger.warn(e.message)
-
-        # after we have gathered data up for all endpoints, then batch writes out to
-        # the device cloud
-        datapoints_written = stream_writer.get_datapoints_written()
-        if len(datapoints_written) > 0:
-            self._dc.batch_stream_write(datapoints_written)
+            # after we have gathered data up for all endpoints, then batch writes out to
+            # the device cloud
+            dc = DeviceCloud(cwear_app.related_dcaccount.username,
+                             cwear_app.related_dcaccount.password)
+            datapoints_written = stream_writer.get_datapoints_written()
+            if len(datapoints_written) > 0:
+                dc.batch_stream_write(datapoints_written)
 
     def process_batch_for_endpoint(self, endpoint, batch, stream_writer):
         endpoint_spec = self.get_humanapi_mapping_metadata().get(endpoint)

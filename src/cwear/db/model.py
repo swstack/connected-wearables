@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import scoped_session, relationship
 from sqlalchemy.orm.session import sessionmaker
 import os
 
@@ -42,6 +42,7 @@ class SyncState(DBModelBase):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     endpoint = Column(String, unique=True)
+    hapiaccount_id = Column(Integer, ForeignKey("hapiaccount.id"))
     last_sync_time = Column(DateTime)
 
 
@@ -69,3 +70,8 @@ class CwearApplication(DBModelBase):
     owner = Column(Integer, ForeignKey("users.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
     hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
+    last_sync_time = Column(DateTime)
+    sync_freq_secs = Column(Integer)
+
+    related_dcaccount = relationship("DeviceCloudAccount")
+    related_hapiaccount = relationship("HumanApiAccount")

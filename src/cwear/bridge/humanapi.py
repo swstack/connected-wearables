@@ -9,15 +9,16 @@ logger = logging.getLogger('hapi')
 
 APP_KEY = '0f3692b3d7fa24279e5ea2eebe31b2e7866392bd'
 CLIENT_ID = '683ef654510ba8d03579f5717a90657cb21d7ebd'
-CLIENT_SECRET = '2cca9bf0e4a5d1d6a4df68314a40f4b3daf9c276'
 
 
 class HumanAPI(object):
     """Component used for retrieving endpoint data from Human API"""
 
-    def __init__(self, db_manager, base_url="https://api.humanapi.co/v1/apps"):
+    def __init__(self, db_manager, app_key, client_id, base_url="https://api.humanapi.co/v1/apps"):
         self._db_manager = db_manager
-        self._conn = HttpConnection(HTTPBasicAuth(APP_KEY, ""), base_url)
+        self._app_key = app_key
+        self._client_id = client_id
+        self._conn = HttpConnection(HTTPBasicAuth(self._app_key, ""), base_url)
         logger.info('Human API Started.')
 
     #---------------------------------------------------------------------------
@@ -49,14 +50,16 @@ class HumanAPI(object):
             'locations': self.get_batch('locations')
         }
 
-    def get_batch(self, endpoint):
+    def get_batch(self, cwear_app, endpoint):
         """Get the data for a specific endpoint"""
-
         db_session = self._db_manager.get_db_session()
 
-        endpoint_url = "/%s/users/%s" % (CLIENT_ID, endpoint)
+        endpoint_url = "/%s/users/%s" % (self._client_id, endpoint)
 
-        last_sync = db_session.query(SyncState).filter_by(endpoint=endpoint).first()
+        hapi_account_id = cwear_app.related_hapiaccount.id
+        last_sync = (db_session.query(SyncState)
+                     .filter_by(endpoint=endpoint, hapiaccount_id=hapi_account_id)
+                     .first())
         if last_sync:
             last_sync_time = self._fmt_time(last_sync.last_sync_time)
             endpoint_url += ("?updated_since=%s" % last_sync_time)
@@ -72,16 +75,12 @@ class HumanAPI(object):
             if last_sync:
                 last_sync.last_sync_time = utcnow
             else:
-                new_sync = SyncState(endpoint=endpoint, last_sync_time=utcnow)
+                new_sync = SyncState(
+                    endpoint=endpoint,
+                    hapi_account_id=hapi_account_id,
+                    last_sync_time=utcnow)
                 db_session.add(new_sync)
 
             db_session.commit()
 
         return json.loads(response.text)
-
-
-if __name__ == "__main__":
-    hapi = HumanAPI()
-    hapi.get_batch('activities')
-    hapi.get_batch('bmis')
-    hapi.get_batch('activities')
