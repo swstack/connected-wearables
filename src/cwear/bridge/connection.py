@@ -7,6 +7,10 @@ SUCCESSFUL_STATUS_CODES = [
 ]
 
 
+class HttpException(Exception):
+    """Exception raised when an HTTP request fails"""
+
+
 class HttpConnection(object):
     def __init__(self, auth, base_url):
         self._auth = auth
@@ -27,7 +31,7 @@ class HttpConnection(object):
             time.sleep(1)
 
         err = "%s to %s failed - HTTP(%s)" % (method, url, response.status_code)
-        raise Exception(response, err)
+        raise HttpException(response, err)
 
     #---------------------------------------------------------------------------
     # HTTP Methods
