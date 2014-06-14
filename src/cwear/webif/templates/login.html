@@ -1,41 +1,60 @@
 {% extends "base.html" %}
 
+{% block header %}
+<link href="/css/cover.css" rel="stylesheet">
+<script src='https://connect.humanapi.co/connect.js'></script>
+{% endblock %}
+
 {% block body %}
-<div class="ge-background">
 
-    <div class="row" style="padding-top: 200px;">
-        <div class="col-md-4 col-md-offset-4">
-            <form role="form" action="/login" method="POST"
-                  enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="input-username">Username</label>
-                    <input type="text" class="form-control"
-                           id="input-username" placeholder="Username"
-                           name="user" style="width: 320px;">
-                </div>
-                <div class="form-group">
-                    <label for="input-pwd">Password</label>
-                    <input type="password" class="form-control"
-                           id="input-pwd" placeholder="Password"
-                           name="passwd" style="width: 320px;">
-                </div>
-                <div class="form-group">
-                    <label for="input-admin">Create Admin User</label>
-                    <input type="checkbox" class="form-control"
-                           id="input-admin"
-                           name="admin" style="width: 320px;">
-                </div>
-                <div class="text-center">
-                    <button type="submit" class="btn btn-default btn-lg input-lg">Log In
-                    </button>
-                </div>
+<div class="site-wrapper-inner">
+    <div class="cover-container">
+        <img src="/img/combined.png"/>
 
-            </form>
+        <div class="inner cover">
+            <h1 class="cover-heading">Connect Your Wearable to the Device Cloud
+                by Etherios</h1>
+
+            <p class="lead">Connected wearables is a project that allows you to
+                connect your wearable
+                and other health information with the Device Cloud by Etherios.
+                Data from multiple devices
+                including the Fitbit, Jawbone, and Nike Fuelband can now easily
+                be synced to your device
+                cloud account.
+            </p>
+
+            <p class="lead">
+
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <form role="form" action="/login" method="POST"
+                          enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="input-username">Username</label>
+                            <input type="text" class="form-control"
+                                   id="input-username" placeholder="Username"
+                                   name="user" style="width: 320px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-pwd">Password</label>
+                            <input type="password" class="form-control"
+                                   id="input-pwd" placeholder="Password"
+                                   name="passwd" style="width: 320px;">
+                        </div>
+                        <div class="text-center">
+                            <button type="submit"
+                                    class="btn btn-default btn-lg input-lg">Log
+                                In
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            </p>
         </div>
     </div>
-
-    <div style="height: 100px;">
-    </div>
-
 </div>
+
 {% endblock %}

@@ -1,6 +1,6 @@
 import functools
 from flask import Flask, render_template, session, request, redirect, url_for, flash
-from cwear.db.model import User, DatabaseManager
+from cwear.db.model import User, DatabaseManager, CwearApplication
 import os
 
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
@@ -12,7 +12,7 @@ app.debug = True
 app.secret_key = "1234"
 
 
-def requires_admin(fn):
+def logged_in(fn):
     """Decorator to be applied to routes that require administrator login"""
 
     @functools.wraps(fn)
@@ -37,8 +37,7 @@ def get_current_user():
 
 @app.route('/')
 def index():
-    db = db_manager.get_db_session()
-    return render_template('index.html')
+    return redirect('/dashboard')
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -81,8 +80,10 @@ def logout():
 
 
 @app.route('/dashboard')
-@requires_admin
+@logged_in
 def dashboard():
+    db = db_manager.get_db_session()
+    apps = db_manager.query()
     return render_template('dashboard.html')
 
 
