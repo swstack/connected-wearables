@@ -26,10 +26,16 @@ def logged_in(fn):
 
     @functools.wraps(fn)
     def ensure_admin(*args, **kwargs):
-        if session.get('user') is None:
-            return redirect('/login')
-        else:
-            return fn(*args, **kwargs)
+        userid = session.get('user_id')
+        if userid:
+            db = db_manager.get_db_session()
+            user = db.query(User).get(userid)
+            if user:
+                return fn(*args, **kwargs)
+
+        session["user"] = None
+        session["user_id"] = None
+        return redirect('/login')
 
     return ensure_admin
 
@@ -118,15 +124,16 @@ def appconfig(name):
         dcpass = request.form.get('dcpass')
         hapiapp = request.form.get('hapiapp')
         hapiclient = request.form.get('hapiclient')
+        syncfreq = request.form.get('syncfreq')
 
-        if dcuser and dcpass and hapiapp and hapiclient:
-            app = db.query(CwearApplication).filter_by(name=name).first()
+        if dcuser and dcpass and hapiapp and hapiclient and syncfreq:
+            cwearapp = db.query(CwearApplication).filter_by(name=name).first()
             hapiaccount = HumanApiAccount(app_key=hapiapp, client_id=hapiclient)
             dcaccount = DeviceCloudAccount(username=dcuser, password=dcpass)
             db.add(hapiaccount)
             db.add(dcaccount)
-            app.hapiaccount = hapiaccount.id
-            app.dcaccount = dcaccount.id
+            cwearapp.related_hapiaccount = hapiaccount
+            cwearapp.related_dcaccount = dcaccount
             db.commit()
             flash('Updated Successfully.')
         else:

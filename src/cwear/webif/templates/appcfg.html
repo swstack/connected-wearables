@@ -31,18 +31,29 @@
 
 
             <h1 class="page-header">Application - {{app.name}}</h1>
+
             <div class="row">
                 <form role="form" action="/app/{{app.name}}" method="POST"
                       enctype="multipart/form-data">
                     <div class="form-group">
+                        <h2>Global Config</h2>
+                        <label for="syncfreq">Sync Frequency (secs)</label>
+                        <input type="text" class="form-control"
+                               id="syncfreq"
+                               value="{{app.sync_freq_secs}}"
+                               name="syncfreq" style="width: 320px;">
+                    </div>
+                    <div class="form-group">
                         <h2>Device Cloud Config</h2>
                         <label for="dcuser">Username</label>
                         <input type="text" class="form-control"
-                               id="dcuser" placeholder="Name"
+                               id="dcuser"
+                               value="{{app.related_dcaccount.username}}"
                                name="dcuser" style="width: 320px;">
                         <label for="dcpass">Password</label>
                         <input type="text" class="form-control"
-                               id="dcpass" placeholder="Name"
+                               id="dcpass"
+                               value="{{app.related_dcaccount.password}}"
                                name="dcpass" style="width: 320px;">
                     </div>
 
@@ -51,11 +62,13 @@
                         <h2>Human API Config</h2>
                         <label for="hapiapp">App Key</label>
                         <input type="text" class="form-control"
-                               id="hapiapp" placeholder="Name"
+                               id="hapiapp"
+                               value="{{app.related_hapiaccount.app_key}}"
                                name="hapiapp" style="width: 320px;">
                         <label for="hapiclient">Client ID</label>
                         <input type="text" class="form-control"
-                               id="hapiclient" placeholder="Name"
+                               id="hapiclient"
+                               value="{{app.related_hapiaccount.client_id}}"
                                name="hapiclient" style="width: 320px;">
                         <button type="submit"
                                 class="btn btn-default btn-lg input-lg">

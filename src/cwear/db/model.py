@@ -69,8 +69,8 @@ class CwearApplication(DBModelBase):
     name = Column(String, unique=True)
     owner = Column(Integer, ForeignKey("users.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
-    hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))    last_sync_time = Column(DateTime)
-    sync_freq_secs = Column(Integer)
-
+    hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
+    last_sync_time = Column(DateTime)
+    sync_freq_secs = Column(Integer, default=60)
     related_dcaccount = relationship("DeviceCloudAccount")
     related_hapiaccount = relationship("HumanApiAccount")
