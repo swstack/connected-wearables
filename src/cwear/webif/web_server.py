@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
 
 app = Flask(__name__, static_url_path="")
+app.debug = True
 app.secret_key = "1234"
 db = SQLAlchemy(app)
 
