@@ -1,3 +1,5 @@
+"""Heroku Worker deamon"""
+
 from cwear.bridge.bridge import HumanApiDeviceCloudBridge
 import logging
 import sys
@@ -14,7 +16,6 @@ def _setup_root_logger():
     formatter = logging.Formatter("%(asctime)s | %(name)-12s | %(message)s",
                                   "%m/%d %H:%M:%S")
     stream_handler.setFormatter(formatter)
-
 
 if __name__ == "__main__":
     _setup_root_logger()
