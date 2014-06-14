@@ -4,8 +4,12 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
 
+DB = os.environ.get('DATABASE_URL')
+if not DB:
+    DB = "postgresql+psycopg2://cwear:cwear@localhost/cwear"
+
 app = Flask(__name__, static_url_path="")
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///stats.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = DB
 app.debug = True
 app.secret_key = "1234"
 db = SQLAlchemy(app)
