@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, String, Boolean, DateTime
+from sqlalchemy import Integer, Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
@@ -43,3 +43,28 @@ class SyncState(DBModelBase):
     id = Column(Integer, primary_key=True, autoincrement=True)
     endpoint = Column(String, unique=True)
     last_sync_time = Column(DateTime)
+
+
+class DeviceCloudAccount(DBModelBase):
+    __tablename__ = "dcaccount"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String)
+    password = Column(String)
+
+
+class HumanApiAccount(DBModelBase):
+    __tablename__ = "hapiaccount"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    app_key = Column(String)
+    client_id = Column(String)
+
+
+class CwearApplication(DBModelBase):
+    __tablename__ = "cwearapplication"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    owner = Column(Integer, ForeignKey("user.id"), nullable=False)
+    dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
+    hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
