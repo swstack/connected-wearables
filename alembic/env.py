@@ -3,6 +3,11 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "cwear", "webif"))
+import web_server
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -10,6 +15,9 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
+
+cur_db_uri = config.get_section_option('alembic', 'sqlalchemy.url')
+config.set_section_option('alembic', 'sqlalchemy.url', web_server.app.config['SQLALCHEMY_DATABASE_URI'])
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -35,7 +43,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url, target_metadata=target_metadata)
+    context.configure(url=url)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -68,4 +76,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-
