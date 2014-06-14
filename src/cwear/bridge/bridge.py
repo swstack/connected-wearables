@@ -2,6 +2,7 @@
 import json
 
 from dc import DeviceCloud, DataPoint
+from cwear.db.model import DatabaseManager
 from humanapi import HumanAPI
 import logging
 
@@ -65,8 +66,9 @@ class HumanAPIStreamWriter(object):
 
 class HumanApiDeviceCloudBridge(object):
     def __init__(self):
+        self._db_manager = DatabaseManager()
         self._dc = DeviceCloud("connectedwearables", "Cwear12$")
-        self._hapi = HumanAPI()
+        self._hapi = HumanAPI(self._db_manager)
 
     def update(self):
         """Update the bridge"""
