@@ -181,3 +181,26 @@ production database.
 ```sh
 $ heroku run alembic upgrade head
 ```
+
+Other Notes
+===========
+
+Limitations
+-----------
+
+There are a few small issues that are known and probably a bunch that are unknown:
+
+* No Security on login... Login the first time and an account is created
+* No ability to add devices directly from web app (need to go to human api site)
+* Probably not super robust at this point (but some work done on this)
+
+Underlying Costs
+----------------
+
+* Dyno worker costs ~$34/month
+
+Prove it Works
+--------------
+
+We don't have separate functionality for this.  You can view it on the Device Cloud directly.
+
