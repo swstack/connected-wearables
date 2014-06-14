@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger('dc')
 
+MAXIMUM_DATAPOINTS_PER_POST = 250
 
 class DataPoint(object):
 
@@ -23,6 +24,7 @@ class DataPoint(object):
         out = StringIO()
         out.write("<DataPoint>")
         out.write("<data>%s</data>" % self.data)
+        out.write("<streamid>%s</streamid>" % self.path)
         if self.description is not None:
             out.write("<description>%s</description>" % self.description)
         if self.timestamp is not None:
@@ -47,14 +49,25 @@ class DeviceCloud(object):
     #---------------------------------------------------------------------------
     # Stream API
     #---------------------------------------------------------------------------
-    def batch_stream_write(self, path, data_points):
-        datapoints_out = StringIO()
-        datapoints_out.write("<list>")
-        for dp in data_points:
-            datapoints_out.write(dp.to_xml())
-        datapoints_out.write("</list>")
+    def batch_stream_write(self, data_points):
+        #
+        # Although extremely poorly documented, the device cloud now supports the ability to
+        # update datapoints from multiple streams via a single POST request.  Completely
+        # undocumented is the limitation of only being able to update 250 per request (at least
+        # that is the limit currently).
+        #
+        # So, we will do chunks of 250 until all of this batch is written to the cloud.
+        #
+        while data_points:
+            this_chunk_of_datapoints = data_points[:MAXIMUM_DATAPOINTS_PER_POST]
+            data_points = data_points[MAXIMUM_DATAPOINTS_PER_POST:]
+            datapoints_out = StringIO()
+            datapoints_out.write("<list>")
+            for dp in this_chunk_of_datapoints:
+                datapoints_out.write(dp.to_xml())
+            datapoints_out.write("</list>")
 
-        dc_path = "/ws/DataPoint" + path
-        self._conn.post(dc_path, datapoints_out)
+            dc_path = "/ws/DataPoint/dummy"  # the device cloud requires a path, even though it is ignored
+            self._conn.post(dc_path, datapoints_out.getvalue())
 
-        logger.info('DataPoint batch written: %s', path)
+            logger.info('DataPoint batch of %s datapoints written' % len(this_chunk_of_datapoints))

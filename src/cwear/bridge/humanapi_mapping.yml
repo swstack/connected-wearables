@@ -1,0 +1,282 @@
+#
+# The contents of this file describe the data from the Human API that
+# we would like to map to device cloud streams.  Some items are not
+# passed over and others we need to provide some type/unit hinting.
+#
+# NOTE: the device cloud has no type for datetime... annoying.  We mark as "datetime" type and
+#   will do mapping to string later on.
+#
+# --------------------------------------------------------------------------
+#
+# The batch endpoints are as follows:
+#
+# /apps/:clientId/users/activities
+# /apps/:clientId/users/heart_rates
+# /apps/:clientId/users/bmis
+# /apps/:clientId/users/body_fats
+# /apps/:clientId/users/heights
+# /apps/:clientId/users/weights
+# /apps/:clientId/users/blood_glucoses
+# /apps/:clientId/users/blood_oxygens
+# /apps/:clientId/users/sleeps
+# /apps/:clientId/users/blood_pressures
+# /apps/:clientId/users/genetic_traits    <-- Not modeled at all; doesn't really work as a "stream" of data, ever
+# /apps/:clientId/users/locations
+
+# Property	Type	Description
+# -----------------------------
+# id	      String	The Id of the resource
+# userId	  String	The global Id of the user
+# startTime	  Date	The start time of the activity
+# endTime	  Date	The end time of the activity
+# type	      String	The type of activity, such as walking, running, cycling
+# source	  String	The name of the originating service
+# duration	  Number	The duration in seconds
+# distance	  Number	The distance in meters
+# steps	      Number	The number of steps taken during the activity
+# calories	  Number	The number of estimated calories burned during the activity
+# timeZone	  String	The name of the time zone for the activity, if available.
+# sourceData  Object	Additional data from the source that does not fit into the humanapi model. This data can include things such as "Fuel points" for the Nike service.
+# timeSeries  Object	Time series data of different data such as heart rate, gps location etc.
+# createdAt	  Date	    The time the activity was created on the Human API server
+# updatedAt	  Date	    The time the activity was updated on the Human API server
+activities:
+  timestamp_field: createdAt
+  forward_fields:
+    type: string
+    startTime: datetime
+    endTime: datetime
+    duration:
+      type: integer
+      units: seconds
+    distance:
+      type: integer
+      unit: meters
+    steps: integer
+    calories: integer
+    timeZone: string
+    sourceData: string
+    timeSeries: string  # object
+    updatedAt: datetime
+
+# TODO: Heart Rates is not described well in the API reference
+#heart_rates:
+#  forward_fields:
+
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the body mass index measurement
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# value     Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+bmis:
+  timestamp_field: timestamp  # use this instead of createdAt
+  forward_fields:
+    createdAt: datetime  # since we have an actual timestamp for this data
+    source: string
+    value:
+      type: float
+      unit_field: unit  # could be problematic for DC if we have data from multiple sources
+    updatedAt:
+      type: string
+      unit: ISO8601
+
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the body fat measurement
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# value	    Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+
+body_fats:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    value:
+      type: float
+      unit_field: unit
+    updatedAt: datetime
+
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the height measurement
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# value	    Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+heights:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    value:
+      type: float
+      unit_field: unit
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the weight measurement
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# value	    Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+weights:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    value:
+      type: float
+      unit_field: unit
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	Type	Description
+# -----------------------------
+# id        String	The id of the blood glucose reading
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source    String	The source service for the measurement, where it was created
+# value     Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+blood_glucoses:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    value:
+      type: float
+      unit_field: unit
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the blood oxygen measurement
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# value	    Number	The value of the measurement in the unit specified
+# unit	    String	The unit of the measurement value
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+blood_oxygens:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    value:
+      type: float
+      unit_field: unit
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	        Type	Description
+# --------------------------------------
+# id	            String	The id of the sleep measurement
+# userId	        String	The global Id of the user
+# day	            Date	The day the sleep was recorded
+# startTime	        Date	The original start date and time of the location segment
+# endTime	        Date	The original end date and time of the location segment
+# source	        String	The source service for the measurement, where it was created
+# mainSleep	        Boolean	A boolean value indicating if this sleep was the main sleep of the day
+# timeAsleep        Number	The time asleep during the segment (in minutes)
+# timeAwake	        Number	The time awake during the segment (in minutes)
+# efficiency        Number	The efficiency score
+# timeToFallAsleep	Number	The number of minutes it took to fall asleep
+# timeAfterWakeup	Number	The number of minutes in bed after waking up
+# timeInBed	        Number	The total number of minutes spend in bed
+# createdAt	        Date	The time the sleep was created on the Human API server
+# updatedAt	        Date	The time the sleep was updated on the Human API server
+sleeps:
+  timestamp_field: createdAt
+  forward_fields:
+    day: datetime
+    startTime: datetime
+    endTime: datetime
+    source: string
+    mainSleep: boolean
+    timeAsleep:
+      type: float
+      unit: minutes
+    timeAwake:
+      type: float
+      unit: minutes
+    efficiency: float
+    timeToFallAsleep:
+      type: float
+      unit: minutes
+    timeAfterWakeup:
+      type: float
+      unit: minutes
+    timeInBed:
+      type: float
+      unit: minutes
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the blood pressure reading
+# userId	String	The global Id of the user
+# timestamp	Date	The original date and time of the measurement
+# source	String	The source service for the measurement, where it was created
+# systolic	String	The systolic value captured at the time of measurement
+# diastolic	String	The diastolic value captured at the time of measurement
+# unit	    String	The unit of the systolic/diastolic value
+# heartRate	Number	The heart rate in BPM captured at the time of measurement
+# createdAt	Date	The time the measurement was created on the Human API server
+# updatedAt	Date	The time the measurement was updated on the Human API server
+blood_pressures:
+  timestamp_field: timestamp
+  forward_fields:
+    source: string
+    systolic:
+      type: string
+      unit_field: unit
+    diastolic:
+      type: string
+      unit_field: unit
+    haert_rate:
+      type: float
+      unit: BPM
+    createdAt: datetime
+    updatedAt: datetime
+
+# Property	Type	Description
+# -----------------------------
+# id	    String	The id of the location measurement
+# userId	String	The global Id of the user
+# startTime	Date	The original start date and time of the location segment
+# endTime	Date	The original end date and time of the location segment
+# updatedAt	Date	The date and time when the measurement was last updated on the Human API server
+# source	String	The source service for the measurement, where it was created
+# location	Object	The coordinate point with a lat/lon value
+# createdAt	Date	The time the location was created on the Human API server
+# updatedAt	Date	The time the location was updated on the Human API server
+
+# TODO: not clear how best to use "location" field of Data Point for all of this data
+locations:
+  timestamp_field: createdAt
+  forward_fields:
+    startTime: datetime
+    endTime: datetime
+    updatedAt: datetime
+    location: string  # TODO: maybe parse out location so DC can handle
