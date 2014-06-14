@@ -52,6 +52,11 @@ class HumanApiDeviceCloudBridge(object):
         sync_freq_seconds = cwear_app.sync_freq_secs
         if last_sync_dt is None or (now - last_sync_dt).total_seconds() > sync_freq_seconds:
             stream_writer = HumanAPIStreamWriter()
+
+            if (not cwear_app.related_dcaccount) or (not cwear_app.related_hapiaccount):
+                # Accounts not configured yet
+                return
+
             hapi = HumanAPI(
                 db_manager=self._db_manager,
                 app_key=cwear_app.related_hapiaccount.app_key,
@@ -79,6 +84,8 @@ class HumanApiDeviceCloudBridge(object):
     def process_batch_for_endpoint(self, endpoint, batch, stream_writer):
         endpoint_spec = self.get_humanapi_mapping_metadata().get(endpoint)
         endpoint_timestamp_field = endpoint_spec.get("timestamp_field", "createdAt")
+        if not batch:
+            return
         for event in batch:
             datum_id = event.get("id")
             user_id = event.get("userId")

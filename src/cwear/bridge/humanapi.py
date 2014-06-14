@@ -77,7 +77,7 @@ class HumanAPI(object):
             else:
                 new_sync = SyncState(
                     endpoint=endpoint,
-                    hapi_account_id=hapi_account_id,
+                    hapiaccount_id=hapi_account_id,
                     last_sync_time=utcnow)
                 db_session.add(new_sync)
 

@@ -41,7 +41,7 @@ class SyncState(DBModelBase):
     __tablename__ = "syncstate"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    endpoint = Column(String, unique=True)
+    endpoint = Column(String)
     hapiaccount_id = Column(Integer, ForeignKey("hapiaccount.id"))
     last_sync_time = Column(DateTime)
 
@@ -66,12 +66,11 @@ class CwearApplication(DBModelBase):
     __tablename__ = "cwearapplication"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
+    name = Column(String, unique=True)
     owner = Column(Integer, ForeignKey("users.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
     hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
     last_sync_time = Column(DateTime)
-    sync_freq_secs = Column(Integer)
-
+    sync_freq_secs = Column(Integer, default=60)
     related_dcaccount = relationship("DeviceCloudAccount")
     related_hapiaccount = relationship("HumanApiAccount")

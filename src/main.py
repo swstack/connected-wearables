@@ -26,12 +26,16 @@ if __name__ == "__main__":
     _setup_root_logger()
     logger.critical('--------------------------BOOT--------------------------')
     dbmgr = DatabaseManager()
-    db = dbmgr.get_db_session()
     bridge = HumanApiDeviceCloudBridge(dbmgr)
 
     while True:
-        # Get the cwear applications and iterate over them
-        cwear_applications = get_cwear_applications(db)
-        for application in cwear_applications:
-            bridge.update(application)
-        time.sleep(1.0)
+        try:
+            db = dbmgr.get_db_session()
+            # Get the cwear applications and iterate over them
+            cwear_applications = get_cwear_applications(db)
+            for application in cwear_applications:
+                bridge.update(application)
+            time.sleep(1.0)
+        except Exception, e:
+            logger.critical(e.message)
+            time.sleep(1)

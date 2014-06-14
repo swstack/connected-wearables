@@ -21,16 +21,6 @@
 </head>
 <body>
 <div class="site-wrapper">
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="container">
-            {% for message in messages %}
-            <div class="alert alert-info">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    {% endwith %}
-
     {% block body %}{% endblock %}
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
