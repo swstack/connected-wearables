@@ -17,7 +17,7 @@ import sqlalchemy as sa
 def upgrade():
     op.create_table(
         'user',
-        sa.Column('id', sa.INTEGER),
+        sa.Column('id', sa.INTEGER, primary_key=True, autoincrement=True),
         sa.Column('name', sa.TEXT),
         sa.Column('password', sa.TEXT),
         sa.Column('admin', sa.BOOLEAN)
