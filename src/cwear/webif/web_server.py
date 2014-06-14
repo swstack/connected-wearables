@@ -1,6 +1,7 @@
 import functools
 from flask import Flask, render_template, session, request, redirect, url_for, flash
 from cwear.db.model import User, DatabaseManager, CwearApplication
+from sqlalchemy.exc import ProgrammingError
 import os
 
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
@@ -49,20 +50,20 @@ def login():
     else:
         username = request.form.get("user")
         password = request.form.get("passwd")
-        create_admin_user = (request.form.get("admin") == "on")
         if username and password:
             user = db.query(User).filter_by(name=username).first()
             if user is None:
-                if create_admin_user:
-                    db.add(User(name=username, password=password,
-                                admin=create_admin_user))
-                    db.commit()
-                    session["user"] = username
-                    flash("A new admin account '%s' created")
-                    return redirect("/dashboard")
+                user = User(name=username, password=password, admin=True)
+                db.add(user)
+                db.commit()
+                session["user"] = user.name
+                session["user_id"] = user.id
+                flash("A new admin account '%s' created")
+                return redirect("/dashboard")
             else:
                 if password == user.password:
-                    session["user"] = username
+                    session["user"] = user.name
+                    session["user_id"] = user.id
                     flash("Credentials accepted, have fun!")
                     return redirect("/dashboard")
                 else:
@@ -84,13 +85,25 @@ def logout():
 def dashboard():
     db = db_manager.get_db_session()
     user = db.query(User).filter_by(name=session.get('user')).first()
-    apps = db.query(CwearApplication).get(user.id)
+    apps = db.query(CwearApplication).filter_by(owner=user.id)
     if apps is None:
         apps = []
     return render_template('dashboard.html', **{
         "apps": apps,
     })
 
+
+@app.route('/create_app', methods=["POST"])
+@logged_in
+def add_app():
+    db = db_manager.get_db_session()
+    appname = request.form.get("appname")
+    if appname:
+        newapp = CwearApplication(owner=session['user_id'], name=appname)
+        db.add(newapp)
+        db.commit()
+
+    return redirect("/dashboard")
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

@@ -29,7 +29,7 @@ class DatabaseManager(object):
 
 
 class User(DBModelBase):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
@@ -66,6 +66,6 @@ class CwearApplication(DBModelBase):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
-    owner = Column(Integer, ForeignKey("user.id"), nullable=False)
+    owner = Column(Integer, ForeignKey("users.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
     hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
