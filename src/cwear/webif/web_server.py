@@ -12,9 +12,7 @@ app.secret_key = "1234"
 
 
 def requires_admin(fn):
-    """Decorator to be applied to routes that require administrator login
-
-    """
+    """Decorator to be applied to routes that require administrator login"""
 
     def ensure_admin(*args, **kwargs):
         if session.get('user') is None:

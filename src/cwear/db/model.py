@@ -1,13 +1,13 @@
-from sqlalchemy import Integer, Column, String, Boolean
+from sqlalchemy import Integer, Column, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, exists
+from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.session import sessionmaker
 import os
 
-DB = os.environ.get('DATABASE_URL')
-if not DB:
-    DB = "postgresql+psycopg2://cwear:cwear@localhost/cwear"
+DB_URI = os.environ.get('DATABASE_URL')
+if not DB_URI:
+    DB_URI = "postgresql+psycopg2://cwear:cwear@localhost/cwear"
 
 DBModelBase = declarative_base()
 
@@ -20,7 +20,7 @@ class DatabaseManager(object):
         self._ensure_database_exists()
 
     def _ensure_database_exists(self):
-        self._db_engine = create_engine(DB)
+        self._db_engine = create_engine(DB_URI)
         self._db_engine.connect()
         self._scoped_session = scoped_session(sessionmaker(self._db_engine))
 
@@ -35,3 +35,11 @@ class User(DBModelBase):
     name = Column(String, unique=True)
     password = Column(String)
     admin = Column(Boolean, default=False)
+
+
+class SyncState(DBModelBase):
+    __tablename__ = "syncstate"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    endpoint = Column(String, unique=True)
+    last_sync_time = Column(DateTime)
