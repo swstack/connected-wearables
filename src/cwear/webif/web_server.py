@@ -6,8 +6,10 @@ THIS_DIR = os.path.dirname(__file__)
 sys.path.append(os.path.join(THIS_DIR, "..", ".."))
 
 import functools
-from flask import Flask, render_template, session, request, redirect, url_for, flash
-from cwear.db.model import User, DatabaseManager, CwearApplication
+from flask import Flask, render_template, session, request, redirect, url_for, \
+    flash
+from cwear.db.model import User, DatabaseManager, CwearApplication, \
+    HumanApiAccount, DeviceCloudAccount
 
 
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
@@ -70,7 +72,7 @@ def login():
                 if password == user.password:
                     session["user"] = user.name
                     session["user_id"] = user.id
-                    flash("Credentials accepted, have fun!")
+                    flash("Welcome.")
                     return redirect("/dashboard")
                 else:
                     flash("Provided username or password was not correct")
@@ -94,9 +96,43 @@ def dashboard():
     apps = db.query(CwearApplication).filter_by(owner=user.id)
     if apps is None:
         apps = []
+
     return render_template('dashboard.html', **{
         "apps": apps,
     })
+
+
+@app.route('/app/<name>', methods=["GET", "POST"])
+@logged_in
+def appconfig(name):
+    db = db_manager.get_db_session()
+
+    if request.method == "GET":
+        app = db.query(CwearApplication).filter_by(name=name).first()
+        context = {
+            "app": app
+        }
+        return render_template('appcfg.html', **context)
+    else:
+        dcuser = request.form.get('dcuser')
+        dcpass = request.form.get('dcpass')
+        hapiapp = request.form.get('hapiapp')
+        hapiclient = request.form.get('hapiclient')
+
+        if dcuser and dcpass and hapiapp and hapiclient:
+            app = db.query(CwearApplication).filter_by(name=name).first()
+            hapiaccount = HumanApiAccount(app_key=hapiapp, client_id=hapiclient)
+            dcaccount = DeviceCloudAccount(username=dcuser, password=dcpass)
+            db.add(hapiaccount)
+            db.add(dcaccount)
+            app.hapiaccount = hapiaccount.id
+            app.dcaccount = dcaccount.id
+            db.commit()
+            flash('Updated Successfully.')
+        else:
+            flash('Incomplete data')
+
+        return redirect("/app/%s" % name)
 
 
 @app.route('/create_app', methods=["POST"])
@@ -110,6 +146,7 @@ def add_app():
         db.commit()
 
     return redirect("/dashboard")
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
