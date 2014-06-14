@@ -1,7 +1,7 @@
 """Bridge the input from Human API into Device Cloud streams"""
 import json
 
-from dc import DeviceCloud
+from dc import DeviceCloud, DataPoint
 from humanapi import HumanAPI
 import logging
 
@@ -15,8 +15,14 @@ BATCHES = {
     "activities": {
         "keys": {
             "type": "string",
-            "startTime": "datetime",
-            "endTime": "datetime",
+            "startTime": {
+                "type": "string",
+                "units": "ISO8601"
+            },
+            "endTime": {
+                "type": "string",
+                "units": "ISO8601"
+            },
             "duration": {
                 "type": "integer",
                 "units": "seconds",
@@ -29,37 +35,54 @@ BATCHES = {
             "calories": "integer",
             "timeZone": "string",
             "sourceData": "string",
-            "timeSeries": "string", # object
-            "updatedAt": "datetime",
+            "timeSeries": "string",  # object
+            "updatedAt": {
+                "type": "string",
+                "units": "ISO8601"
+            },
         }
     }
 }
 
 
-class DataStreamWrite(object):
-
-    def __init__(self, path, **kwargs):
-        self.path = path
-        self.kwargs = kwargs
-
-
 class HumanAPIStreamWriter(object):
-
     def __init__(self):
         self._writes = []
 
-    def write(self, user_id, endpoint, datum_id, path, **kwargs):
+    def write(self, user_id, endpoint, path, **kwargs):
         fullpath = "/human/{}/{}/{}".format(user_id, endpoint, path)
-        self._writes.append(DataStreamWrite(fullpath, **kwargs))
+        self._writes.append(DataPoint(fullpath, **kwargs))
+
+    def get_writes(self):
+        return self._writes
+
+    def get_writes_by_path(self):
+        writes_by_path = {}
+        for write in self._writes:
+            writes_by_path.setdefault(write.path, []).append(write)
+        return writes_by_path
 
 
 class HumanApiDeviceCloudBridge(object):
     def __init__(self):
         self._dc = DeviceCloud("connectedwearables", "Cwear12$")
-        # self._hapi = HumanAPI()
+        self._hapi = HumanAPI()
 
-    def start(self):
-        logger.info('Bridge Started.')
+    def update(self):
+        """Update the bridge"""
+
+        stream_writer = HumanAPIStreamWriter()
+
+        for endpoint in BATCHES:
+            data = self._hapi.get_batch(endpoint)
+
+            try:
+                self.process_batch_for_endpoint(endpoint, data, stream_writer)
+            except ValueError, e:
+                logger.warn(e.message)
+            else:
+                for path, writes in stream_writer.get_writes_by_path().items():
+                    self._dc.batch_stream_write(path, writes)
 
     def process_batch_for_endpoint(self, endpoint, batch, stream_writer):
         endpoint_spec = BATCHES.get(endpoint)
@@ -70,8 +93,8 @@ class HumanApiDeviceCloudBridge(object):
 
             # write out full "document" to datastreams
             stream_writer.write(
-                user_id, endpoint, datum_id, "document",
-                unit="json", timestamp=created_at, value=json.dumps(event)
+                user_id, endpoint, "document", description=datum_id,
+                unit="json", timestamp=created_at, data=json.dumps(event)
             )
 
             for key, key_spec in endpoint_spec.get("keys").items():
@@ -90,9 +113,10 @@ class HumanApiDeviceCloudBridge(object):
                     continue
                 else:
                     stream_writer.write(
-                        user_id, endpoint, datum_id, key,
+                        user_id, endpoint, key,
                         data_type=key_tp,
                         unit=key_unit,
-                        value=value,
-                        timestamp=created_at
+                        data=value,
+                        timestamp=created_at,
+                        description=datum_id
                     )
