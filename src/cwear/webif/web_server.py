@@ -1,8 +1,14 @@
+import sys
+import os
+
+THIS_DIR = os.path.dirname(__file__)
+
+sys.path.append(os.path.join(THIS_DIR, "..", ".."))
+
 import functools
 from flask import Flask, render_template, session, request, redirect, url_for, flash
 from cwear.db.model import User, DatabaseManager, CwearApplication
-from sqlalchemy.exc import ProgrammingError
-import os
+
 
 HAPI_CLIENT_ID = os.environ.get('HAPI_CLIENT_ID')
 
