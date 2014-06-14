@@ -41,7 +41,7 @@ class SyncState(DBModelBase):
     __tablename__ = "syncstate"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    endpoint = Column(String, unique=True)
+    endpoint = Column(String)
     hapiaccount_id = Column(Integer, ForeignKey("hapiaccount.id"))
     last_sync_time = Column(DateTime)
 
