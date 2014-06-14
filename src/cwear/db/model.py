@@ -66,11 +66,10 @@ class CwearApplication(DBModelBase):
     __tablename__ = "cwearapplication"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
+    name = Column(String, unique=True)
     owner = Column(Integer, ForeignKey("users.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
-    hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))
-    last_sync_time = Column(DateTime)
+    hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))    last_sync_time = Column(DateTime)
     sync_freq_secs = Column(Integer)
 
     related_dcaccount = relationship("DeviceCloudAccount")
