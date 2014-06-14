@@ -65,6 +65,7 @@ class CwearApplication(DBModelBase):
     __tablename__ = "cwearapplication"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
     owner = Column(Integer, ForeignKey("user.id"), nullable=False)
     dcaccount = Column(Integer, ForeignKey("dcaccount.id"))
     hapiaccount = Column(Integer, ForeignKey("hapiaccount.id"))

@@ -83,8 +83,13 @@ def logout():
 @logged_in
 def dashboard():
     db = db_manager.get_db_session()
-    apps = db_manager.query()
-    return render_template('dashboard.html')
+    user = db.query(User).filter_by(name=session.get('user')).first()
+    apps = db.query(CwearApplication).get(user.id)
+    if apps is None:
+        apps = []
+    return render_template('dashboard.html', **{
+        "apps": apps,
+    })
 
 
 if __name__ == "__main__":
