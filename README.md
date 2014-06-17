@@ -3,7 +3,7 @@ Connected Wearables
 
 The connected wearables project was created for an Etherios hackathon
 in order to connect data from wearable devices to the Device Cloud by
-Etherios.  The project was created by 3 endingeers from Etherios
+Etherios.  The project was created by 3 engineers from Etherios
 Wireless Design Servies: Paul Osborne
 ([posborne](https://github.com/posborne)),
 Tom Manley ([tpmanley](https://github.com/tpmanley)), and Stephen
@@ -52,7 +52,7 @@ received from the HumanAPI was a challenge.  As there did not seem to
 be one-size-fits-all
 solution for all potential consumers of data out of the device cloud,
 we attempted to provide
-a fwe options to that implementor.
+a few options to that implementor.
 
 For all cases, the following basic stream path format is used:
 
@@ -80,7 +80,7 @@ Device Cloud is used.
 This mapping can be found in
 [humanapi_mapping.yml](https://github.com/swstack/connected-wearables/blob/master/src/cwear/bridge/humanapi_mapping.yml)
 
-An exmaple of how the mapping is done for blood_oxygen information is
+An example of how the mapping is done for blood_oxygen information is
 shown here:
 
 ```
