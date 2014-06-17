@@ -23,8 +23,8 @@ class DataPoint(object):
     def to_xml(self):
         out = StringIO()
         out.write("<DataPoint>")
+        out.write("<streamId>%s</streamId>" % (self.path[1:] if self.path.startswith('/') else self.path))
         out.write("<data>%s</data>" % self.data)
-        out.write("<streamid>%s</streamid>" % self.path)
         if self.description is not None:
             out.write("<description>%s</description>" % self.description)
         if self.timestamp is not None:
@@ -67,7 +67,7 @@ class DeviceCloud(object):
                 datapoints_out.write(dp.to_xml())
             datapoints_out.write("</list>")
 
-            dc_path = "/ws/DataPoint/dummy"  # the device cloud requires a path, even though it is ignored
+            dc_path = "/ws/DataPoint"
             self._conn.post(dc_path, datapoints_out.getvalue())
 
             logger.info('DataPoint batch of %s datapoints written' % len(this_chunk_of_datapoints))
