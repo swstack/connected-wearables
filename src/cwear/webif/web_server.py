@@ -26,15 +26,19 @@ def logged_in(fn):
 
     @functools.wraps(fn)
     def ensure_admin(*args, **kwargs):
-        userid = session.get('user_id')
-        if userid:
-            db = db_manager.get_db_session()
-            user = db.query(User).get(userid)
-            if user:
-                return fn(*args, **kwargs)
+        try:
+            userid = session.get('user_id')
+            if userid:
+                db = db_manager.get_db_session()
+                user = db.query(User).get(userid)
+                if user:
+                    return fn(*args, **kwargs)
 
-        session["user"] = None
-        session["user_id"] = None
+            session["user"] = None
+            session["user_id"] = None
+        except:
+            session["user"] = None
+            session["user_id"] = None
         return redirect('/login')
 
     return ensure_admin
@@ -91,7 +95,8 @@ def login():
 @app.route('/logout')
 def logout():
     session['user'] = None
-    return redirect('/')
+    session['user_id'] = None
+    return redirect('/login')
 
 
 @app.route('/dashboard')
