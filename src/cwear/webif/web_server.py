@@ -72,7 +72,7 @@ def login():
                 db.commit()
                 session["user"] = user.name
                 session["user_id"] = user.id
-                flash("A new admin account '%s' created")
+                flash("A new admin account created for %s" % user.name)
                 return redirect("/dashboard")
             else:
                 if password == user.password:
