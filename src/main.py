@@ -1,4 +1,4 @@
-"""Heroku Worker deamon"""
+"""Heroku Worker daemon"""
 
 from cwear.bridge.bridge import HumanApiDeviceCloudBridge
 import logging
