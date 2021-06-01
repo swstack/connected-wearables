@@ -16,5 +16,5 @@ itsdangerous==0.24
 mock==1.0.1
 psycopg2==2.5.3
 requests==2.3.0
-urllib3==1.8.2
+urllib3==1.26.5
 wsgiref==0.1.2
