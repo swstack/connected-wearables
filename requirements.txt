@@ -1,7 +1,7 @@
 Flask==0.10.1
 Flask-SQLAlchemy==1.0
 Jinja2==2.7.3
-Mako==1.0.0
+Mako==1.2.2
 MarkupSafe==0.23
 PyYAML==3.11
 SQLAlchemy==0.9.4
